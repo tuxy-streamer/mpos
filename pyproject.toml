@@ -1,0 +1,17 @@
+[project]
+name = "mpos"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+    "micropython-esp8266-stubs>=1.28.0.post4",
+    "micropython-stdlib-stubs>=1.28.0.post5",
+    "micropython-unix-stubs>=1.28.0.post1",
+    "mpremote>=1.28.0",
+    "pytest>=9.1.1",
+    "pytest-stub>=1.1.0",
+]
+
+[tool.pytest.ini_options]
+pythonpath = ["."]
