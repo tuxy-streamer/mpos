@@ -21,20 +21,37 @@ async def safe_print(*args: object) -> None:
 
 
 class Process:
-    def __init__(self, coroutine: callable, name: str) -> None:
+    def __init__(self, coroutine: callable, name: str, max_restarts: int = 0) -> None:
         self.id: int = 0
         self.name: str = name
         self.coroutine: callable = coroutine
         self.task: asyncio.Task[None] | None = None
         self.created_at: float = time.time()
         self.running: bool = False
+        self.restart_count: int = 0
+        self.max_restarts: int = max_restarts
 
     async def run(self) -> None:
         self.running = True
-        try:
-            await self.coroutine()
-        finally:
-            self.running = False
+        while True:
+            try:
+                await self.coroutine()
+                break
+            except asyncio.CancelledError:
+                self.running = False
+                raise
+            except Exception as e:
+                if self.restart_count < self.max_restarts:
+                    self.restart_count += 1
+                    await safe_print(
+                        f"Restarting [{self.name}] "
+                        + f"({self.restart_count}/{self.max_restarts}): {e}"
+                    )
+                    await asyncio.sleep_ms(10)
+                else:
+                    await safe_print(f"[{self.name}] failed permanently.")
+                    self.running = False
+                    break
 
     async def kill(self) -> None:
         task = self.task
