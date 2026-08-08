@@ -81,6 +81,12 @@ class ProcessManager:
         await safe_print(f"Killed [{proc.name}]")
         return True
 
+    async def cancel_all(self) -> None:
+        for proc in self.processes.values():
+            if proc.task:
+                _ = proc.task.cancel()
+        self.processes.clear()
+
     async def status(self) -> None:
         await safe_print(f"Active Processes = ({len(self.processes)})")
         for pid, proc in self.processes.items():
