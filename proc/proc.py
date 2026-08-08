@@ -65,9 +65,10 @@ class Process:
 
 
 class ProcessManager:
-    def __init__(self, min_free_memory: int = 2048) -> None:
+    def __init__(self, max_process: int = 5, min_free_memory: int = 2048) -> None:
         self.processes: dict[int, Process] = {}
         self.next_id: int = 1
+        self.max_process: int = max_process
         self.min_free_memory: int = min_free_memory
 
     async def check_memory_threshold(self) -> bool:
@@ -79,6 +80,10 @@ class ProcessManager:
 
     async def spawn(self, proc: Process) -> int:
         if not await self.check_memory_threshold():
+            await safe_print(f"Spawn blocked [{proc.name}]")
+            return -1
+
+        if self.max_process < len(self.processes):
             await safe_print(f"Spawn blocked [{proc.name}]")
             return -1
 
