@@ -98,7 +98,7 @@ class ProcessManager:
         proc = self.processes.get(pid)
         if proc is None:
             return False
-        await proc.kill()
+        _ = asyncio.create_task(proc.kill())
         del self.processes[pid]
         await safe_print(f"Killed [{proc.name}]")
         return True
